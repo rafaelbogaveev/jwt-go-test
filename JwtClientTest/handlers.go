@@ -28,10 +28,10 @@ var signingKey string = `|1|TYBNL92OcDy1ZziWR6BSK7Ybnjs=|9qlZ8sb7o3sqbF6oHzqeEsq
 `
 
 func addRoutes(r *mux.Router)  {
-	r.HandleFunc("/test", TestRequest).Methods("GET")
+	r.HandleFunc("/test", UserRequest).Methods("GET")
 }
 
-func TestRequest(w http.ResponseWriter, r *http.Request)  {
+func UserRequest(w http.ResponseWriter, r *http.Request)  {
 	start := time.Now()
 
 	r.ParseForm()
@@ -48,6 +48,7 @@ func TestRequest(w http.ResponseWriter, r *http.Request)  {
 	if err != nil {
 		println(err)
 		http.Error(w, http.StatusText(500), 500)
+		fmt.Println(time.Since(start))
 		return
 	}
 
@@ -57,16 +58,18 @@ func TestRequest(w http.ResponseWriter, r *http.Request)  {
 	if err != nil {
 		println(err)
 		http.Error(w, http.StatusText(500), 500)
+		fmt.Println(time.Since(start))
 		return
 	}
 
-	result := "ok"
 	tokenString := string(data)
 	if tokenString != token {
-		result = "wrong"
+		http.Error(w, http.StatusText(401), 401)
+		fmt.Println(time.Since(start))
+		return
 	}
 
-	w.Write([]byte(result))
+	w.Write([]byte("ok"))
 	fmt.Println(time.Since(start))
 }
 

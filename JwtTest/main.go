@@ -23,10 +23,12 @@ var signingKey string = `|1|TYBNL92OcDy1ZziWR6BSK7Ybnjs=|9qlZ8sb7o3sqbF6oHzqeEsq
 |1|CBDQGIjUWiqHFJaBiNjhLlCSsRg=|Pb8MLw447/lygirpUrUcVrxeP2w= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJnCNgpOA5viPysEYcXULga+wksDNY30/MRYiyz/aXeCPbMUyjTocgMdAzYseM2oaK8/VeeBmvwFQlapbFPp3pE=
 `
 
+var tokens = make(map[string]Token)
 
 func main() {
 	r := mux.NewRouter()
-	addRoutes(r)
+	addPublicRoutes(r)
+	addPrivateRoutes(r)
 
 	http.ListenAndServe(":3002", r)
 }

@@ -1,18 +1,18 @@
 package main
 
 import (
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"net/http"
+	"time"
 )
 
-func addRoutes(r *mux.Router) {
+func addPrivateRoutes(r *mux.Router) {
 	r.HandleFunc("/test", authorizedOnly(Test)).Methods("GET")
 }
 
 func Test(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	tokenString := r.FormValue("token")
+	tokenString := r.FormValue("x-auth")
 
 	w.Write([]byte(tokenString))
 }
@@ -20,19 +20,28 @@ func Test(w http.ResponseWriter, r *http.Request) {
 func authorizedOnly(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
-		//email := r.FormValue("email")
-		tokenString := r.FormValue("token")
+		email := r.FormValue("email")
+		userToken := r.Header.Get("x-auth")
 
-		token := jwt.New(jwt.SigningMethodHS256)
-		encodedToken, err := token.SignedString([]byte(signingKey))
+		token, ok := tokens[email];
+		if !ok {
+			http.Error(w, http.StatusText(401), 401)
+			return
+		}
 
+		if token.ExpirationDate.Before(time.Now().UTC()) {
+			http.Error(w, http.StatusText(403), 403)
+			return
+		}
+
+		encodedToken, err := generateAccessToken([]string{email, token.Updated.String()}, signingKey)
 		if err != nil {
 			println(err)
 			http.Error(w, http.StatusText(500), 500)
 			return
 		}
 
-		if tokenString != encodedToken {
+		if encodedToken != userToken {
 			http.Error(w, http.StatusText(401), 401)
 			return
 		}
