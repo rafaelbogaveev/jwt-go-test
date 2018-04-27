@@ -50,8 +50,15 @@ func register(w http.ResponseWriter, r *http.Request) {
 func refreshToken(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	email := r.FormValue("email")
+	refreshToken := r.FormValue("refreshToken")
 
 	oldToken, ok := tokens[email]
+
+	if oldToken.RefreshToken != refreshToken {
+		println("No token to refresh")
+		http.Error(w, http.StatusText(401), 401)
+		return
+	}
 
 	if !ok {
 		println("No token to refresh")

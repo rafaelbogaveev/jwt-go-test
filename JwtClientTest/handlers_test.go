@@ -66,9 +66,10 @@ func TestRequest(t *testing.T) {
 		// it is forbidden to get access by current token
 		if resp.StatusCode == 403 {
 			println("token expired")
-			token, err := getRefreshToken(email)
+			token, err := getRefreshToken(email, "")
 			if err != nil{
 				accessToken = ""
+				println("Couldn't refresh token")
 				println(err)
 				fmt.Println(time.Since(start))
 				continue
@@ -109,8 +110,8 @@ func getNewToken(email string) (token Token, err error) {
 	return token, err
 }
 
-func getRefreshToken(email string) (token Token, err error)  {
-	resp, err := http.Get(fmt.Sprintf("http://localhost:3002/refresh?email=%s", email))
+func getRefreshToken(email string, refreshToken string) (token Token, err error)  {
+	resp, err := http.Get(fmt.Sprintf("http://localhost:3002/refresh?email=%s&refreshToken=%s", email, refreshToken))
 
 	if err != nil {
 		return token, err
